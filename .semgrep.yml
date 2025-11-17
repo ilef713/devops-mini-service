@@ -1,0 +1,46 @@
+rules:
+  - id: python-flask-debug-mode
+    patterns:
+      - pattern: app.run(..., debug=$X)
+      - pattern-regex: debug\s*=\s*True
+    message: "Ne pas laisser Flask en debug=True en production (risque d'exécution de code)."
+    severity: ERROR
+    languages: [python]
+    metadata:
+      category: security
+
+  - id: python-eval-usage
+    pattern: eval(...)
+    message: "Usage de eval() dangereux — évite d'évaluer du code non fiable."
+    severity: ERROR
+    languages: [python]
+    metadata:
+      category: security
+
+  - id: python-subprocess-shell-true
+    pattern: subprocess.$FUNC(..., shell=True, ...)
+    message: "subprocess with shell=True can be vulnerable to shell injection."
+    severity: WARNING
+    languages: [python]
+    metadata:
+      category: security
+
+  - id: python-hardcoded-credentials
+    patterns:
+    - pattern-not: '"charset"'
+    - pattern: $VAR = "$PASSWORD"
+    message: "Possible mot de passe ou secret en dur dans le code."
+    severity: WARNING
+    languages: [python]
+    metadata:
+      category: secret
+
+  - id: python-unsafe-tempfile
+    pattern-regex: tempfile\.(NamedTemporaryFile|mktemp)\(
+    message: "Usage de tempfile.mktemp() ou NamedTemporaryFile sans précaution peut être risque."
+    severity: WARNING
+    languages: [python]
+    metadata:
+      category: robustness
+
+   
