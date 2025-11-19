@@ -27,6 +27,12 @@ def before_request():
     g.start_time = time.time()
     logger.info(f"[REQ {g.request_id}] Nouvelle requête reçue sur {request.path}")
 
+def compute_values(number):
+    square = number * number
+    root = math.sqrt(number) if number >= 0 else None
+    return square, root
+
+
 @app.route("/", methods=["GET", "POST"])
 def main():
     number = None
@@ -36,8 +42,7 @@ def main():
     if request.method == "POST":
         try:
             number = float(request.form.get("number"))
-            square = number * number
-            root = math.sqrt(number) if number >= 0 else "N/A"
+            square, root = compute_values(number)
         except ValueError:
             number = None
             square = None
