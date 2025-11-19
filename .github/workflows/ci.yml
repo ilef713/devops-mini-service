@@ -32,3 +32,18 @@ jobs:
         run: |
          python -m pytest -q
 
+      - name: Install Semgrep
+        run: |
+         pip install semgrep
+
+      - name: Run Semgrep SAST
+        run: |
+         semgrep --config p/ci  
+
+      - name: Run Semgrep SAST and save report
+        run: |
+         semgrep --config p/ci --json > semgrep_report.json
+         semgrep --config p/ci --html > semgrep_report.html
+   
+
+
