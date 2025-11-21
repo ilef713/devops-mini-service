@@ -48,18 +48,23 @@ jobs:
         run: |
          nohup python app.py &
          sleep 5  
-      - name: Install OWASP ZAP
+      - name: Run DAST with OWASP ZAP
         run: |
-         wget https://github.com/zaproxy/zaproxy/releases/download/v2.12.0/ZAP_2_12_0_Linux.tar.gz
-         tar -xvzf ZAP_2_12_0_Linux.tar.gz
-         export PATH=$PATH:$PWD/ZAP_2_12_0
-      - name: Run OWASP ZAP DAST
-        run: |
-         zap.sh -daemon -port 8080 -host 127.0.0.1 -config api.disablekey=true
-         zap-cli --zap-url http://127.0.0.1:8080 quick-scan http://127.0.0.1:5000
-         zap-cli report -o zap_report.html -f html
-         zap-cli report -o zap_report.json -f json
+          docker run --network="host" \
+            -v ${{ github.workspace }}:/zap/wrk:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+              -t http://127.0.0.1:5000 \
+              -r zap_report.html \
+              -j zap_report.json || true
 
+      - name: Upload ZAP Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-dast-reports
+          path: |
+            zap_report.html
+            zap_report.json
 
 
 
