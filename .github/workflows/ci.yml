@@ -75,12 +75,12 @@ jobs:
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
-          docker build -t "${{ secrets.ilef7103 }}/devops-mini-service:latest" .
+          docker build -t ${{ secrets.ilef7103 }}/devops-mini-service:latest .
 
       - name: Push Docker image
         run: |
           echo "Pushing Docker image..."
-          docker push "${{ secrets.ilef7103 }}/devops-mini-service:latest"
+          docker push ${{ secrets.ilef7103 }}/devops-mini-service:latest
 
 
 
