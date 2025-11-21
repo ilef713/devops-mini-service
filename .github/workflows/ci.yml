@@ -44,5 +44,22 @@ jobs:
         run: |
          semgrep --config p/ci --json > semgrep_report.json
    
+      - name: Start Flask service
+        run: |
+         nohup python app.py &
+         sleep 5  
+      - name: Install OWASP ZAP
+        run: |
+         wget https://github.com/zaproxy/zaproxy/releases/download/v2.12.0/ZAP_2_12_0_Linux.tar.gz
+         tar -xvzf ZAP_2_12_0_Linux.tar.gz
+         export PATH=$PATH:$PWD/ZAP_2_12_0
+      - name: Run OWASP ZAP DAST
+        run: |
+         zap.sh -daemon -port 8080 -host 127.0.0.1 -config api.disablekey=true
+         zap-cli --zap-url http://127.0.0.1:8080 quick-scan http://127.0.0.1:5000
+         zap-cli report -o zap_report.html -f html
+         zap-cli report -o zap_report.json -f json
+
+
 
 
