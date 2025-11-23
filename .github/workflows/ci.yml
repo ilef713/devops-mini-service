@@ -106,8 +106,7 @@ jobs:
 
       - name: Wait for pod
         run: |
-          kubectl wait --for=condition=ready pod \
-            -l app=devops-mini --timeout=120s
+          kubectl wait --for=condition=available deployment/devops-mini-deployment --timeout=120s
 
       - name: Port forward & test
         run: |
