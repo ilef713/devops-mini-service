@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-mini-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-mini
+  template:
+    metadata:
+      labels:
+        app: devops-mini
+    spec:
+      containers:
+        - name: devops-mini-container
+          image: ilef7103/devops-mini-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
