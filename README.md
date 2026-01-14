@@ -21,7 +21,6 @@ Elle expose également :
 - Kubernetes (Kind ou minikube)
 - Git
 
-
 ## Setup Instructions
 
 1. Cloner le repo :  
