@@ -3,12 +3,28 @@ import time
 import math
 import uuid
 from flask import Flask, render_template_string, request, g
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+
 
 # --- Metrics ---
-metrics = {
-    "request_count": 0,
-    "last_request_duration_ms": 0
-}
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"]
+)
+
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request latency",
+    ["endpoint"]
+)
+
+ERROR_COUNT = Counter(
+    "http_errors_total",
+    "Total HTTP errors",
+    ["endpoint"]
+)
+
 
 
 app = Flask(__name__)
@@ -25,6 +41,7 @@ logger = logging.getLogger(__name__)
 def before_request():
     g.request_id = str(uuid.uuid4())
     g.start_time = time.time()
+    g.endpoint = request.path
     logger.info(f"[REQ {g.request_id}] Nouvelle requête reçue sur {request.path}")
 
 def compute_values(number):
@@ -88,22 +105,32 @@ def main():
 
 @app.after_request
 def after_request(response):
-    duration = round((time.time() - g.start_time) * 1000, 2)
+    duration = time.time() - g.start_time
+
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=g.endpoint,
+        status=response.status_code
+    ).inc()
+
+    REQUEST_LATENCY.labels(
+        endpoint=g.endpoint
+    ).observe(duration)
+
     logger.info(
-        f"[REQ {g.request_id}] Réponse envoyée | Status={response.status} | Durée={duration} ms"
+        f"[REQ {g.request_id}] Réponse envoyée | Status={response.status} | Durée={round(duration*1000,2)} ms"
     )
-    metrics["request_count"] += 1
-    metrics["last_request_duration_ms"] = duration
+
     return response
 
+
 @app.route("/metrics")
-def metrics_endpoint():
-    output = ""
-    for key, value in metrics.items():
-        output += f"{key} {value}\n"
-    return output, 200, {"Content-Type": "text/plain"}
+def metrics():
+    return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
+
 @app.errorhandler(Exception)
 def handle_exception(e):
+    ERROR_COUNT.labels(endpoint=request.path).inc()
     logger.error(f"[REQ {g.get('request_id', 'N/A')}] ERREUR: {str(e)}")
     return "Internal Server Error", 500
 

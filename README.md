@@ -1,71 +1,121 @@
+
 # devops-mini-service
 
-Mini backend Flask pour le projet DevOps.
+A mini backend service built with Flask to demonstrate an end-to-end DevOps workflow including CI/CD, security, observability, containerization, and Kubernetes deployment.
 
-## Description
+---
 
-Cette application Flask permet de calculer :  
-- Le carréd’un nombre  
-- La racine carrée d’un nombre (uniquement si positif)  
+## Project Overview
 
-Elle expose également :  
-- Un endpoint /metrics pour les métriques basiques  
-- Des logs structurés et un trace ID pour chaque requête  
+This project is an individual DevOps mini-project designed to practice real-world DevOps concepts:
 
+- Backend development
+- CI/CD automation
+- Static & dynamic security scanning
+- Docker & Kubernetes
+- Observability with metrics
 
-## Prerequisites
+The application performs simple numerical computations and exposes monitoring metrics.
+
+---
+
+##  Features
+
+- Compute:
+  - Square of a number
+  - Square root (only for non-negative values)
+- HTML user interface (Flask + Bootstrap)
+- REST endpoints
+- Structured logging with request trace ID
+- Prometheus-ready `/metrics` endpoint
+- Automated CI/CD pipeline (GitHub Actions)
+- SAST with Semgrep
+- DAST with OWASP ZAP
+- Docker container (Gunicorn + Flask)
+- Kubernetes deployment using Kind
+- Automation via Makefile
+
+##  Prerequisites
 
 - Python 3.10+
 - pip
-- Docker
-- Kubernetes (Kind ou minikube)
+- Docker & Docker Compose
 - Git
+- kubectl
+- Kind
+- Make
 
-## Setup Instructions
+---
 
-1. Cloner le repo :  
+##  Local Setup
+
+### Clone the repository
+
+```bash
 git clone https://github.com/ilef713/devops-mini-service.git
 cd devops-mini-service
 
-2.Installer les dépendances Python :
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+Install dependencies
+make install
 
-3.Lancer les tests :
-pytest -q
+Run tests
+make test
 
-4.exécuter le service localement :
-python app.py
-Le service sera accessible sur :
- http://localhost:5000
-Metrics : http://localhost:5000/metrics
+Run the application locally
+make run
 
-5.Docker Usage
-docker build -t ilef7103/devops-mini-service:latest .
+Access:
 
-docker run -p 5000:5000 ilef7103/devops-mini-service:latest
+ App: http://localhost:5000
 
-6.Kubernetes Deployment (Kind)
--Créer un cluster KIND :
-kind create cluster --name devops-mini --config kind-config.yaml
+ Metrics: http://localhost:5000/metrics
 
--Appliquer les manifests Kubernetes :
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
 
--Vérifier que le pod est prêt :
-kubectl get pods
-kubectl get svc
+Docker
 
--Accéder au service via NodePort :
-kubectl port-forward svc/devops-mini-service 5000:5000
-curl http://localhost:5000
+Build Docker image
+make docker-build
 
-7.API Examples
-GET /
-Accède à la page HTML principale.
+Run Docker container
+make docker-run
 
-POST /
-Formulaire pour calculer le carré et la racine 
+Push to Docker Hub
+make docker-push
 
-GET /metrics
+
+Security Scanning
+Static Application Security Testing (SAST)
+
+Uses Semgrep to analyze source code.
+make sast
+
+Dynamic Application Security Testing (DAST)
+Uses OWASP ZAP to scan the running service.
+make dast
+
+Prometheus & Grafana
+Start monitoring stack:
+make obs-up
+
+Access:
+ Prometheus: http://localhost:9090
+ Grafana: http://localhost:3000
+
+Stop services:
+make obs-down
+
+Kubernetes Deployment (Kind)
+Create Kind cluster
+make kind-create
+
+Deploy application
+make k8s-deploy
+
+Check status
+make k8s-status
+
+Access application
+make k8s-port-forward
+
+Then open:
+http://localhost:5000

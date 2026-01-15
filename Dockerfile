@@ -8,10 +8,11 @@ WORKDIR /app
 COPY . .
 
 # 4. Installer les dépendances
-RUN pip install --no-cache-dir flask
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Exposer le port 5000
 EXPOSE 5000
 
 # 6. Lancer le service
-CMD ["python", "app.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+
